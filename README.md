@@ -52,6 +52,7 @@ python3 agent_verX.py
 agent_ver1.py              \# Main AI agent script
 configs/                   \# Folder containing keyword-command .conf files
 configs/redirects.conf     \# Saves user redirects (created automatically)
+configs/config_here.conf   \# Any configs you might want to add
 
 ```
 
