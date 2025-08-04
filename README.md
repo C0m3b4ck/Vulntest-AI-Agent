@@ -92,5 +92,5 @@ Use responsibly. This tool is intended for authorized penetration testing and ne
 
 ---
 
-If you have questions or want to contribute, reach out to **C0m3b4ck.**
+If you have questions, feature requests or want to contribute, reach out to **C0m3b4ck.**
 
