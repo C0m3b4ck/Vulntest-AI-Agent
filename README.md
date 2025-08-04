@@ -78,7 +78,6 @@ sudo hping3 --flood -S {target}
 
 ## Roadmap / Future Enhancements  
 - Add more functions to be extracted from keywords
-- (maybe) add safety measures for words like "ddos" that will warn the user about potential consequences. These words will be stored in safety.conf
 - Support multiple target extraction per prompt  
 - Add logging and analytics of executed commands (and debugger mode)
 - Support other command substitution tokens besides `{target}`   
