@@ -1,4 +1,4 @@
-<img src="logohere.png" class="logo" width="120"/>
+<img src="logo.jpeg" class="logo" width="120"/>
 # Vulntest AI Agent  
 <img src="https://img.shields.io/github/downloads/C0m3b4ck/Vulntest-AI-Agent/total">
 
