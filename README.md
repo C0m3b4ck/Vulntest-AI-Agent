@@ -77,10 +77,10 @@ sudo hping3 --flood -S {target}
 ```
 
 ## Roadmap / Future Enhancements  
-- Add more functions to be extracted from keywords
+- Add more functions to be extracted from keywords - if you need a specific one, just ask! 
 - Support multiple target extraction per prompt  
-- Add logging and analytics of executed commands (and debugger mode)
-- Support other command substitution tokens besides `{target}`   
+- Add logging and analytics of executed commands (and debugger mode) - if you need a specific one, just ask! 
+- Support other command substitution tokens besides `{target}` - if you need a specific one, just ask!   
 
 ## What is up to you
 - Adding additional arguments (like "no installation") to .conf files
