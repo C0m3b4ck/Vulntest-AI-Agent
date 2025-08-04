@@ -87,7 +87,7 @@ sudo hping3 --flood -S {target}
 - Making .conf files, though I will publish some example ones every now and then
 
 ## Disclaimer  
-Use responsibly. This tool is intended for authorized penetration testing and network diagnostics only. Use to attack without consent is illegal.
+Use responsibly. This tool is intended for authorized penetration testing and network diagnostics only. Using the tool to attack without consent is illegal.
 
 ---
 
