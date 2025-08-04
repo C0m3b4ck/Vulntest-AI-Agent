@@ -1,6 +1,7 @@
 <img src="logo.jpeg" class="logo" width="120"/>
-# Vulntest AI Agent  
 <img src="https://img.shields.io/github/downloads/C0m3b4ck/Vulntest-AI-Agent/total">
+
+# Vulntest AI Agent
 
 An open-source, prompt-driven AI agent for automated vulnerability command execution using configurable keyword-command mappings. 100% offline. Simple and easy to build on and customize for your own needs!
 
