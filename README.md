@@ -49,6 +49,7 @@ python3 agent_verX.py
 - **User Interaction:** Prompts before command execution and error handling with option to correct config matches.  
 - **Redirect Learning:** User can teach the AI better matching via redirect mappings.  
 - **Cross-Platform:** Runs on Windows and Linux environments with Python installed.
+- **Dangerous Prompt Detection:** Checks for words written in safety.conf in prompt (for example "ddos"), then warns user about potential consequences
 
 ## Folder Structure  
 ```
@@ -80,7 +81,7 @@ sudo hping3 --flood -S {target}
 ## Roadmap / Future Enhancements  
 - Add more functions to be extracted from keywords - if you need a specific one, just ask! 
 - Support multiple target extraction per prompt  
-- Add logging and analytics of executed commands (and debugger mode) - if you need a specific one, just ask! 
+- Add logging and analytics of executed commands (and debugger mode)
 - Support other command substitution tokens besides `{target}` - if you need a specific one, just ask!   
 
 ## What is up to you
