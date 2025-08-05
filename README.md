@@ -36,9 +36,10 @@ python3 agent_verX.py
 
 - **Target Extraction:**  
   - First attempts to extract an IPv4 address from prompt.  
-  - If none found, extracts domain names and resolves the first via DNS to an IP address.  
+  - If none found, extracts domain names and resolves the first via DNS to an IP address.
+  - User can also select to proceed even if target is not found in prompt
 
-- **Command Execution:** The chosen command from the matched `.conf` file is customized with the extracted target and presented to the user for confirmation.
+- **Command Execution:** The chosen commands from the matched `.conf` file are customized with the extracted target and presented to the user for confirmation.
 - **User Confirmation:** Only executes on explicit user approval (if user inputs "yes"). 
 - **Redirects:** If the prompt was previously incorrectly matched, a `redirects.conf` file can override the conf selection. That allows for "training" the model or rather manually correcting its mistakes.
   
@@ -54,7 +55,7 @@ python3 agent_verX.py
 ## Folder Structure  
 ```
 
-agent_ver1.py              \# Main AI agent script
+agent_verX.py              \# Main AI agent script
 configs/                   \# Folder containing keyword-command .conf files
 configs/redirects.conf     \# Saves user redirects (created automatically)
 configs/config_here.conf   \# Any configs you might want to add
