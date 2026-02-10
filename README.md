@@ -1,5 +1,6 @@
 <img src="logo.jpeg" class="logo" width="120"/>
 <img src="https://img.shields.io/github/downloads/C0m3b4ck/Vulntest-AI-Agent/total">
+<br><b>🇪🇺🇪🇺🇪🇺Made in Europe🇪🇺🇪🇺🇪🇺
 
 # Vulntest AI Agent
 
