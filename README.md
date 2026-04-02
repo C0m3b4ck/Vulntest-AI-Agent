@@ -8,6 +8,11 @@ An open-source, prompt-driven AI agent for automated vulnerability command execu
 
 ## Contributors  
 Started on August 4th, 2025 by C0m3b4ck.
+<br>The agent was trained on openly available data. 
+<br>
+```
+Links to all are available in links.txt
+```
 
 # Why I made this
 I was watching some YouTube but then got annoyed at the constant cheesy AI ads telling that prompt engineering is the past and agents are the future. They also said how if I don't sign up for their webinar I will suffer. In order to prove them wrong, I made this and I quite like it! I though about such an "agent" earlier but never had the motivation.
@@ -15,7 +20,7 @@ I was watching some YouTube but then got annoyed at the constant cheesy AI ads t
 ## Requirements  
 - Python 3.x (tested on Python 3.13)  
 - Runs on Linux (tested on Ubuntu Linux), Windows might need modified file handling and model download
-- Uses standard Python libraries: `os`, `re`, `subprocess`, `socket`  
+- Uses standard Python libraries: `os`, `re`, `subprocess`, `socket`
 
 ## Installation  
 Simply clone or download the script and create a `configs` folder alongside it.  
