@@ -44,6 +44,13 @@ The agent picks the correct tool based on your prompt.
 - **Prompt-based AI Agent:** Works with natural language inputs including domains, IPs and files.    
 - **Dangerous Prompt Detection:** Checks for words written in safety.conf in prompt (for example "ddos"), then warns user about potential consequences
 
+## Functions
+Done:
+- getting file hash of a local file
+To-do:
+- getting file hash and comparing it to signature databases
+- getting file hash and using the VirusTotal API
+
 ## Folder Structure  
 ```
 
