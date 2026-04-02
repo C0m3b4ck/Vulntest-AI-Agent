@@ -1,0 +1,7 @@
+https://bazaar.abuse.ch/export/json/recent.json
+https://bazaar.abuse.ch/export/json/full.json.gz
+
+https://virusshare.com/hashes/
+https://hash.cymru.com
+https://malshare.com/daily.php
+https://github.com/vxunderground
