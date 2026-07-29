@@ -7,6 +7,45 @@ CONFIG_DIR = './configs'
 REDIRECTS_FILE = os.path.join(CONFIG_DIR, 'redirects.conf')
 SAFETY_FILE = os.path.join(CONFIG_DIR, 'safety.conf')
 
+# RFC 1918 private IP ranges to block by default
+PRIVATE_RANGES = [
+    (1, '10.0.0.0', '10.255.255.255'),
+    (1, '172.16.0.0', '172.31.255.255'),
+    (1, '192.168.0.0', '192.168.255.255'),
+    (1, '127.0.0.0', '127.255.255.255'),
+    (1, '169.254.0.0', '169.254.255.255'),
+    (1, '0.0.0.0', '0.255.255.255'),
+]
+
+def ip_to_int(ip):
+    parts = ip.split('.')
+    return (int(parts[0]) << 24) + (int(parts[1]) << 16) + (int(parts[2]) << 8) + int(parts[3])
+
+def is_private_ip(ip):
+    try:
+        ip_int = ip_to_int(ip)
+        for _, start, end in PRIVATE_RANGES:
+            if ip_to_int(start) <= ip_int <= ip_to_int(end):
+                return True
+    except (ValueError, IndexError):
+        pass
+    return False
+
+def require_authorization():
+    print("\n" + "=" * 60)
+    print("AUTHORIZATION REQUIRED")
+    print("=" * 60)
+    print("You must confirm that you have EXPLICIT WRITTEN PERMISSION")
+    print("to test the target system(s). Unauthorized testing is ILLEGAL.")
+    print("-" * 60)
+    choice = input("Do you have authorization to test this target? (yes/no): ").strip().lower()
+    if choice != 'yes':
+        print("Command aborted: authorization not confirmed.")
+        return False
+    print("Authorization confirmed.")
+    print("=" * 60 + "\n")
+    return True
+
 def load_conf_files():
     confs = {}
     for filename in os.listdir(CONFIG_DIR):
@@ -151,8 +190,30 @@ def main():
         print("AI Agent: Could not find a valid IP target in the prompt.")
         return
 
+    # Block private/internal IP ranges by default
+    if is_private_ip(target):
+        print(f"AI Agent: ERROR - Target {target} is a private/internal IP address.")
+        print("AI Agent: Targeting internal networks is blocked by default.")
+        override = input("Override private IP block? (yes/no): ").strip().lower()
+        if override != 'yes':
+            print("AI Agent: Command aborted: cannot target private IP.")
+            return
+        print("AI Agent: Private IP block overridden.")
+
+    # Authorization check
+    if not require_authorization():
+        return
+
     command_to_run = conf_data['command'].replace('{target}', target)
     print(f"AI Agent: Planned Command: {command_to_run}")
+
+    # Input sanitization: warn if command contains special characters beyond expected
+    dangerous_chars = [';', '|', '&&', '||', '`', '$(']
+    for dc in dangerous_chars:
+        if dc in target:
+            print(f"AI Agent: WARNING - Target contains '{dc}'. Command injection attempt detected.")
+            print("AI Agent: Command aborted for security reasons.")
+            return
 
     confirm = input("Proceed with command? (yes/no): ").strip().lower()
     if confirm == 'yes':

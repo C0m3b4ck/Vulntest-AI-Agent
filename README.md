@@ -1,6 +1,13 @@
 <img src="logo.jpeg" class="logo" width="120"/>
 <img src="https://img.shields.io/github/downloads/C0m3b4ck/Vulntest-AI-Agent/total">
 
+> **⚠️ LEGAL DISCLAIMER — READ BEFORE USE**
+> This tool is for **authorized security testing only**. Launching network attacks (e.g., port scans, DDoS) against targets you do not own or lack written permission to test is **illegal** in most jurisdictions, including under the EU Cybercrime Directive 2013/40/EU and similar laws worldwide.
+>
+> By default, this tool blocks internal/private IP ranges (RFC 1918) to prevent accidental targeting of local networks. The safety keyword system flags dangerous operations (ddos, flood, attack, etc.) and requires explicit second confirmation.
+>
+> **You are solely responsible for ensuring you have proper authorization before testing any target.**
+
 # Vulntest AI Agent
 
 An open-source, prompt-driven AI agent for automated vulnerability command execution using configurable keyword-command mappings. 100% offline. Simple and easy to build on and customize for your own needs!
