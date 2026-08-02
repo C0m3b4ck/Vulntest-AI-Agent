@@ -12,6 +12,9 @@
 
 An open-source, prompt-driven AI agent for automated vulnerability command execution using configurable keyword-command mappings. 100% offline. Simple and easy to build on and customize for your own needs!
 
+> **⚠️ IMPORTANT — Use `agent_ver4.py`**
+> `versions/agent_ver1.py`, `versions/agent_ver2.py`, and `versions/agent_ver3.py` are **legacy/unsafe**. They lack the safety checks added in ver4 (private IP blocking, authorization confirmation, input sanitization, dangerous-command guards, and command logging). Do not run the legacy versions against real targets. Only `agent_ver4.py` is supported.
+
 ## Contributors  
 Started on August 4th, 2025 by C0m3b4ck.
 

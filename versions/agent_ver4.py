@@ -1,11 +1,23 @@
 import os
 import re
+import sys
+import logging
 import subprocess
 import socket
+import tempfile
 
 CONFIG_DIR = './configs'
 REDIRECTS_FILE = os.path.join(CONFIG_DIR, 'redirects.conf')
 SAFETY_FILE = os.path.join(CONFIG_DIR, 'safety.conf')
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(message)s',
+    filename='agent.log',
+)
+
+# Markers for attack-style commands that require extra explicit confirmation
+DANGEROUS_CMD_MARKERS = ['hping3', 'flood', 'slowloris', 'ddos', '--flood', '--scan']
 
 # RFC 1918 private IP ranges to block by default
 PRIVATE_RANGES = [
@@ -17,9 +29,33 @@ PRIVATE_RANGES = [
     (1, '0.0.0.0', '0.255.255.255'),
 ]
 
+def valid_ipv4(ip):
+    try:
+        parts = ip.split('.')
+        if len(parts) != 4:
+            return False
+        for part in parts:
+            if not part.isdigit():
+                return False
+            if not 0 <= int(part) <= 255:
+                return False
+        return True
+    except ValueError:
+        return False
+
 def ip_to_int(ip):
     parts = ip.split('.')
-    return (int(parts[0]) << 24) + (int(parts[1]) << 16) + (int(parts[2]) << 8) + int(parts[3])
+    if len(parts) != 4:
+        raise ValueError(f"Invalid IPv4 address: {ip}")
+    octets = []
+    for part in parts:
+        if not part.isdigit():
+            raise ValueError(f"Invalid IPv4 address: {ip}")
+        octet = int(part)
+        if not 0 <= octet <= 255:
+            raise ValueError(f"Invalid IPv4 address: {ip}")
+        octets.append(octet)
+    return (octets[0] << 24) + (octets[1] << 16) + (octets[2] << 8) + octets[3]
 
 def is_private_ip(ip):
     try:
@@ -48,16 +84,35 @@ def require_authorization():
 
 def load_conf_files():
     confs = {}
-    for filename in os.listdir(CONFIG_DIR):
-        if filename.endswith('.conf') and filename != 'redirects.conf' and filename != 'safety.conf':
-            path = os.path.join(CONFIG_DIR, filename)
-            with open(path, 'r') as f:
-                lines = [line.strip() for line in f if line.strip() and not line.startswith('#')]
-                if len(lines) >= 2:
-                    keywords_line = lines[0]
-                    command_line = lines[1]
-                    keywords = [kw.strip().lower() for kw in keywords_line.split(',')]
-                    confs[filename] = {'keywords': keywords, 'command': command_line}
+    for filename in sorted(os.listdir(CONFIG_DIR)):
+        if not filename.endswith('.conf'):
+            continue
+        if filename in ('redirects.conf', 'safety.conf'):
+            continue
+        path = os.path.join(CONFIG_DIR, filename)
+        with open(path, 'r') as f:
+            lines = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+        if not lines:
+            continue
+        keywords = None
+        command_lines = []
+        for line in lines:
+            lower = line.lower()
+            if lower.startswith('keywords:'):
+                keywords = line.split(':', 1)[1]
+            elif lower.startswith('command:'):
+                command_lines.append(line.split(':', 1)[1])
+            elif lower.startswith('mode:'):
+                continue
+            elif keywords is None and not command_lines:
+                keywords = line
+            else:
+                command_lines.append(line)
+        if keywords is None or not command_lines:
+            continue
+        keyword_list = [kw.strip().lower() for kw in keywords.split(',') if kw.strip()]
+        command = '\n'.join(cmd.strip() for cmd in command_lines if cmd.strip())
+        confs[filename] = {'keywords': keyword_list, 'command': command}
     return confs
 
 def load_redirects():
@@ -88,13 +143,14 @@ def resolve_domain_to_ip(domain):
         return None
 
 def extract_target(text):
-    # Try extracting IP addresses first
+    # Try extracting valid IP addresses first
     ip_pattern = r'(\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b)'
     ips = re.findall(ip_pattern, text)
-    if ips:
-        return ips[-1]
+    for ip in reversed(ips):
+        if valid_ipv4(ip):
+            return ip
 
-    # If no IPs found, try domains and resolve
+    # If no valid IPs found, try domains and resolve
     domains = extract_domains(text)
     if domains:
         resolved_ip = resolve_domain_to_ip(domains[0])
@@ -157,9 +213,39 @@ def check_safety(prompt, safety_keywords):
             return kw
     return None
 
+def is_dangerous_command(command):
+    lowered = command.lower()
+    return any(marker in lowered for marker in DANGEROUS_CMD_MARKERS)
+
+def build_command(command, target, conf_name):
+    command = command.replace('{target}', target)
+    base = os.path.splitext(conf_name)[0]
+    output_file = os.path.join(tempfile.gettempdir(), f"{base}_output.txt")
+    input_file = os.path.join(tempfile.gettempdir(), f"{base}_input.txt")
+    with open(input_file, 'a'):
+        pass
+    command = command.replace('{output_file}', output_file)
+    command = command.replace('{input_file}', input_file)
+    return command
+
+def list_configs():
+    confs = load_conf_files()
+    if not confs:
+        print("No configurations loaded.")
+        return
+    for name, data in sorted(confs.items()):
+        print(f"{name}:")
+        print(f"  keywords: {', '.join(data['keywords'])}")
+        print(f"  command: {data['command']}")
+        print()
+
 def main():
     if not os.path.isdir(CONFIG_DIR):
         os.makedirs(CONFIG_DIR)
+
+    if '--list-configs' in sys.argv:
+        list_configs()
+        return
 
     confs = load_conf_files()
     redirects = load_redirects()
@@ -204,8 +290,9 @@ def main():
     if not require_authorization():
         return
 
-    command_to_run = conf_data['command'].replace('{target}', target)
+    command_to_run = build_command(conf_data['command'], target, conf_name)
     print(f"AI Agent: Planned Command: {command_to_run}")
+    logging.info("Planned command for target %s: %s", target, command_to_run)
 
     # Input sanitization: warn if command contains special characters beyond expected
     dangerous_chars = [';', '|', '&&', '||', '`', '$(']
@@ -213,14 +300,30 @@ def main():
         if dc in target:
             print(f"AI Agent: WARNING - Target contains '{dc}'. Command injection attempt detected.")
             print("AI Agent: Command aborted for security reasons.")
+            logging.warning("Command injection attempt blocked for target: %s", target)
             return
+
+    # Extra guard: attack-style commands (hping3/DDoS) need explicit typed confirmation.
+    # Never auto-approve these.
+    if is_dangerous_command(command_to_run):
+        print("AI Agent: WARNING - This is a network attack-style command (e.g., hping3/DDoS).")
+        print("It can only run after you explicitly authorize it in writing.")
+        confirm_danger = input("Type 'I HAVE AUTHORIZATION' to run this command: ").strip()
+        if confirm_danger != 'I HAVE AUTHORIZATION':
+            print("AI Agent: Command aborted: dangerous command was not explicitly authorized.")
+            logging.warning("Dangerous command NOT authorized: %s", command_to_run)
+            return
+        logging.info("Dangerous command explicitly authorized by user.")
 
     confirm = input("Proceed with command? (yes/no): ").strip().lower()
     if confirm == 'yes':
         print("AI Agent: Executing command...")
+        logging.info("EXECUTING target %s | command: %s", target, command_to_run)
         try:
-            subprocess.run(command_to_run, shell=True)
+            result = subprocess.run(command_to_run, shell=True)
+            logging.info("Command finished with return code %d | command: %s", result.returncode, command_to_run)
         except Exception as e:
+            logging.error("Failed to execute command %s: %s", command_to_run, e)
             print(f"AI Agent: Failed to execute command: {e}")
     else:
         print("AI Agent: Command aborted by user.")
